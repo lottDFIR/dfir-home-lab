@@ -1,0 +1,33 @@
+# Case 001: Canon2 SD Card Recovery (Phase 1)
+
+**Date:** Oct 27, 2026
+**Evidence:** nps-2009-canon2-gen1.E01 — 32MB SD card from a Canon PowerShot SD800IS, FAT32
+**Source:** Digital Corpora (public test corpus)
+
+## What this is
+This SD card was reused across 6 photo sessions without being wiped, so later sessions 
+overwrite earlier ones. This is Phase 1: looking at Generation 1, the card's earliest, 
+least-overwritten state.
+
+## What I did
+1. Unpacked the E01 file with `ewfmount` (E01 is a container format, not a raw image).
+2. Used `file` to check the partition structure — found the actual FAT32 filesystem starts 
+   26,112 bytes into the image, not at byte 0.
+3. Mounted it read-only at that offset:
+
+sudo mount -t vfat -o ro,loop,offset=26112 gen1_ewf/ewf1 gen1_mount
+
+4. Found 36 JPEGs in `DCIM/100CANON/` — IMG_0001.JPG through IMG_0036.JPG.
+5. Pulled one out and opened it to check: IMG_0001.JPG is a photo of a monitor showing the 
+   number "1," which matches what the case notes said it should be.
+
+## Result
+All 36 photos from Generation 1 are intact and recoverable through normal means — no carving 
+needed yet, since nothing's been overwritten at this stage. That changes in later generations, 
+which is what Phase 2 will cover.
+
+## What I learned
+- E01 files need to be unpacked before you can mount them.
+- Disk images usually have a partition table wrapped around the real filesystem — use `file` 
+  to find the offset instead of guessing.
+- Never mount evidence as writable.
